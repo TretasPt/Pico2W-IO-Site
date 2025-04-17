@@ -4,6 +4,8 @@ import time
 # print(dir(Pin))
 
 key = Pin(0,Pin.IN,Pin.PULL_UP)
+led = Pin(25,Pin.OUT)
+led.on()
 
 def onKeyRemove(pin):
     print("Key removed. Exiting.")

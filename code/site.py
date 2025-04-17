@@ -10,13 +10,6 @@ ssid, password = getWifi()
 led_one = Pin(14, Pin.OUT)
 led_two = Pin(15, Pin.OUT)
 
-
-#     mimetype.assign     = ( ".html" => "text/html",
-#                         ".txt" => "text/plain",
-#                         ".jpg" => "image/jpeg",
-#                         ".png" => "image/png",
-#                         ".css" => "text/css",
-#                         "" => "application/octet-stream" )
 def formatResponse(status,mimeType,body):
     response = b"HTTP/1.0 " + status + "\nContent-type: " + mimeType + "\n\n" + body
 #     print(response)
@@ -104,7 +97,7 @@ def serveFile(request):
                 target.toggle()
             else:
                 return formatResponse("400 Bad request","text/html","400 - Unknown value " + contentDict.value)
-            return formatResponse("200 OK","text/text","")
+            return formatResponse("200 OK","text/text","target " + contentDict['target'] + " set to " + str(target.value()))
         else:
             return formatResponse("400 Bad request","text/html", "Wrong format. Expected target and value.")
     return formatResponse("500 Internal server error", "text/html","Internal error on function serveFile")
