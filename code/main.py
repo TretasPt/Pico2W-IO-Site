@@ -1,11 +1,11 @@
 from machine import Pin, soft_reset
 import time
+import utils.py
 
 # print(dir(Pin))
 
 key = Pin(0,Pin.IN,Pin.PULL_UP)
-led = Pin(25,Pin.OUT)
-led.on()
+# led = Pin("LED",Pin.OUT)
 
 def onKeyRemove(pin):
     print("Key removed. Exiting.")

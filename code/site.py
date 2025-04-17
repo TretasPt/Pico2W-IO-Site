@@ -12,19 +12,12 @@ led_two = Pin(15, Pin.OUT)
 
 def formatResponse(status,mimeType,body):
     response = b"HTTP/1.0 " + status + "\nContent-type: " + mimeType + "\n\n" + body
-#     print(response)
     return response
 
 def serveFile(request):
-#     if request.find('/led/one') == 6:
-#         led_one.toggle()
-#         
-#     if request.find('/led/two') == 6:
-#         led_two.toggle()
-    print("request: ",request,"\n")
+    # print("request: ",request,"\n")
     parts = request.split(" ")
-#     print(parts[0][2:])
-#     print(parts[1])
+
     if parts[0][2:] == "GET":
         if parts[1] == "/":
             f = open("site.html", "r")
@@ -45,36 +38,6 @@ def serveFile(request):
         else:
             return formatResponse("400 Bad request","text/html","Unknown GET request " + parts[1])
     if(parts[0][2:] == "POST"):
-#         content = request[request.find("{")+1:request.find("}")].replace("\\r\\n","").strip()
-#         print(content)
-#         contentParts = content.split(":")
-#         print(contentParts)
-#         contentParts = [c.replace("\"","").strip() for c in contentParts]
-#         print(contentParts)
-
-#         if(contentParts[0].replace("\"","").strip() == "led1"):
-#             if (contentParts[1].replace("\"","").strip() == "on"):
-#                 led_one.on()
-#             elif (contentParts[1].replace("\"","").strip() == "off"):
-#                 led_one.off()
-#             elif (contentParts[1].replace("\"","").strip() == "toggle"):
-#                 led_one.toggle()
-#             else:
-#                 return "400"
-#         elif(contentParts[0].replace("\"","").strip() == "led2"):
-#             if (contentParts[1].replace("\"","").strip() == "on"):
-#                 led_two.on()
-#             elif (contentParts[1].replace("\"","").strip() == "off"):
-#                 led_two.off()
-#             elif (contentParts[1].replace("\"","").strip() == "toggle"):
-#                 led_two.toggle()
-#             else:
-#                 return "400"
-#         else:
-#                 return "400"
-#         return "200"
-#     value_one = led_one.value()
-#     value_two = led_two.value()
 
         content = request[request.find("{"):request.find("}")+1].replace("\\r","").replace("\\n","").strip()
         print("content: ",content)
