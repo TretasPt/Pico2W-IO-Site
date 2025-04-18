@@ -35,6 +35,11 @@ def serveFile(request):
             f = open("site.js", "r")
             website = f.read()
             return formatResponse("200 OK","text/js",website)
+        elif parts[1] == "/data.json":
+            f = open("site.js", "r")
+            website = f.read()
+            website = '{"data":["todo"]}'
+            return formatResponse("200 OK","application/json",website)
         else:
             return formatResponse("400 Bad request","text/html","Unknown GET request " + parts[1])
     if(parts[0][2:] == "POST"):
@@ -114,3 +119,7 @@ while True:
         break
 
 s.close()
+
+if __name__ == "__main__":
+    text = input("Yell something at a mountain: ")
+    print(text)

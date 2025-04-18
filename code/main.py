@@ -1,29 +1,28 @@
-from machine import Pin, soft_reset
+from machine import Pin, reset
 import time
-import utils.py
+from utils import bin_blink
 
 # print(dir(Pin))
+bin_blink(0,"Imports done.")
 
 key = Pin(0,Pin.IN,Pin.PULL_UP)
 # led = Pin("LED",Pin.OUT)
 
 def onKeyRemove(pin):
     print("Key removed. Exiting.")
-    machine.reset()
+    reset()
 
 key.irq(onKeyRemove)
+
+bin_blink(1,"Key activated.")
+
+# main = lambda(x):print(x)
+main = lambda :print("a")
 if(not key.value()):
     print("Key inserted.")
     print("Run mode.")
-    import site.py
+    import site
+    # main()
 else:
     print("Missing key.")
     print("Going to edit mode.")
-    
-# StopKey = Pin(17,Pin.IN,Pin.PULL_UP)
-# StopKey.irq(lambda p:print(p),Pin.IRQ_RISING)
-
-# led = machine.Pin(1,machine.Pin.OUT)
-# for i in range(60):
-#     led.toggle()
-#     time.sleep(0.5)    
