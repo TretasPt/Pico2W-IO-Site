@@ -5,8 +5,8 @@ from time import sleep
 from machine import Pin
 from siteEnv import getWifi
 
+#Variables
 ssid, password = getWifi()
-
 led_one = Pin(14, Pin.OUT)
 led_two = Pin(15, Pin.OUT)
 
@@ -36,8 +36,8 @@ def serveFile(request):
             website = f.read()
             return formatResponse("200 OK","text/js",website)
         elif parts[1] == "/data.json":
-            f = open("site.js", "r")
-            website = f.read()
+            # f = open("site.js", "r")
+            # website = f.read()
             website = '{"data":["todo"]}'
             return formatResponse("200 OK","application/json",website)
         else:
@@ -70,56 +70,55 @@ def serveFile(request):
             return formatResponse("400 Bad request","text/html", "Wrong format. Expected target and value.")
     return formatResponse("500 Internal server error", "text/html","Internal error on function serveFile")
 
-    
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(ssid, password)
+def main():
+    # Setup wifi connection
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    wlan.connect(ssid, password)
 
-max_wait = 30
-print('Waiting for connection')
-while max_wait > 0:
-    if wlan.status() < 0 or wlan.status() >= 3:
-        break
-    max_wait -= 1
-    sleep(1)
-status = None
-if wlan.status() != 3:
-    raise RuntimeError('Connections failed')
-else:
-    status = wlan.ifconfig()
-    print('connection to', ssid,'succesfull established!', sep=' ')
-    print('IP-adress: ' + status[0])
-ipAddress = status[0]
-addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-try:
-    
-    s = socket.socket()
-    s.bind(addr)
-    s.listen(1)
-except Exception as error:
-    s.close()
-    raise RuntimeError('Socket creation failed.')
-while True:
+    max_wait = 30
+    print('Waiting for connection')
+    while max_wait > 0:
+        if wlan.status() < 0 or wlan.status() >= 3:
+            break
+        max_wait -= 1
+        sleep(1)
+    status = None
+    if wlan.status() != 3:
+        raise RuntimeError('Connections failed')
+    else:
+        status = wlan.ifconfig()
+        print('connection to', ssid,'succesfull established!', sep=' ')
+        print('IP-adress: ' + status[0])
+    ipAddress = status[0]
+    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
     try:
-        cl, addr = s.accept()
-        print('Connection from ', addr, "accepted!")
-        request = cl.recv(1024)
-        request = str(request)
-             
-        a = serveFile(request)
-        print("a.......:\n",a,"\n.....a")
-        cl.send(a)
-        cl.close()
-    except OSError as e:
-        cl.close()
-        print('connection closed')
-    except KeyboardInterrupt as e:
-        print("Program finished by user.")
-        cl.close()
-        break
+        
+        s = socket.socket()
+        s.bind(addr)
+        s.listen(1)
+    except Exception as error:
+        s.close()
+        raise RuntimeError('Socket creation failed.')
+    while True:
+        try:
+            cl, addr = s.accept()
+            print('Connection from ', addr, "accepted!")
+            request = cl.recv(1024)
+            request = str(request)
+            
+            cl.send(serveFile(request))
+            cl.close()
+        except OSError as e:
+            cl.close()
+            print('connection closed')
+        except KeyboardInterrupt as e:
+            print("Program finished by user.")
+            cl.close()
+            break
 
-s.close()
+    # s.
+    s.close()
 
 if __name__ == "__main__":
-    text = input("Yell something at a mountain: ")
-    print(text)
+    main()
