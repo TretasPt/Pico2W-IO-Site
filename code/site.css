@@ -1,12 +1,25 @@
 body {
     background-color: midnightblue;
     color: white;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
 }
 
-input,
 button {
     background-color: cadetblue;
     color: aliceblue;
     border-radius: 30px;
     padding: 5%;
+}
+
+.input-type div{
+    flex-direction: row;
+    display:flex;
+    justify-content: space-evenly;
+}
+
+.input-type div button{
+    padding:10vw
 }

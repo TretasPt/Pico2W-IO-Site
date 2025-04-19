@@ -3,7 +3,7 @@ import socket
 import json
 from time import sleep
 from machine import Pin
-from siteEnv import getWifi
+from myconfig import getWifi,getInterfacesJSON
 
 #Variables
 ssid, password = getWifi()
@@ -38,8 +38,8 @@ def serveFile(request):
         elif parts[1] == "/data.json":
             # f = open("site.js", "r")
             # website = f.read()
-            website = '{"data":["todo"]}'
-            return formatResponse("200 OK","application/json",website)
+            # website = '{"data":["todo"]}'
+            return formatResponse("200 OK","application/json",getInterfacesJSON())
         else:
             return formatResponse("400 Bad request","text/html","Unknown GET request " + parts[1])
     if(parts[0][2:] == "POST"):
@@ -68,6 +68,7 @@ def serveFile(request):
             return formatResponse("200 OK","text/text","target " + contentDict['target'] + " set to " + str(target.value()))
         else:
             return formatResponse("400 Bad request","text/html", "Wrong format. Expected target and value.")
+    
     return formatResponse("500 Internal server error", "text/html","Internal error on function serveFile")
 
 def main():
