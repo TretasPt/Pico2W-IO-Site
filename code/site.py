@@ -3,7 +3,8 @@ import socket
 import json
 from time import sleep
 from machine import Pin
-from myconfig import getWifi,getInterfacesJSON
+from myconfig import getWifi,getInterfacesJSON,runAction
+from utils import bin_blink
 
 #Variables
 ssid, password = getWifi()
@@ -50,22 +51,27 @@ def serveFile(request):
         print("contentDict: ",contentDict)
         
         if('target' in contentDict and 'value' in contentDict):
-            if(contentDict['target'] == "led1"):
-                target = led_one
-            elif(contentDict['target'] == "led2"):            
-                target = led_two
-            else:
-                return formatResponse("400 Bad request","text/html","400 - Unknown target " + contentDict.target)
+            # if(contentDict['target'] == "led1"):
+            #     target = led_one
+            # elif(contentDict['target'] == "led2"):            
+            #     target = led_two
+            # else:
+            #     return formatResponse("400 Bad request","text/html","400 - Unknown target " + contentDict.target)
             
-            if(contentDict['value'] == "on"):
-                target.on()
-            elif(contentDict['value'] == "off"):
-                target.off()
-            elif(contentDict['value'] == "toggle"):
-                target.toggle()
-            else:
-                return formatResponse("400 Bad request","text/html","400 - Unknown value " + contentDict.value)
-            return formatResponse("200 OK","text/text","target " + contentDict['target'] + " set to " + str(target.value()))
+            # if(contentDict['value'] == "on"):
+            #     target.on()
+            # elif(contentDict['value'] == "off"):
+            #     target.off()
+            # elif(contentDict['value'] == "toggle"):
+            #     target.toggle()
+            # else:
+            #     return formatResponse("400 Bad request","text/html","400 - Unknown value " + contentDict.value)
+            
+            # return formatResponse("200 OK","text/text","target " + contentDict['target'] + " set to " + str(target.value()))
+
+            resultStatus, resultMessage = runAction(contentDict['target'],contentDict['value'])
+            return formatResponse(resultStatus,"text/text",resultMessage)
+
         else:
             return formatResponse("400 Bad request","text/html", "Wrong format. Expected target and value.")
     
@@ -101,6 +107,8 @@ def main():
     except Exception as error:
         s.close()
         raise RuntimeError('Socket creation failed.')
+    bin_blink(3,"Starting main loop.")
+
     while True:
         try:
             cl, addr = s.accept()
@@ -120,6 +128,8 @@ def main():
 
     # s.
     s.close()
+    bin_blink(4,"Exiting main loop.")
+
 
 if __name__ == "__main__":
     main()

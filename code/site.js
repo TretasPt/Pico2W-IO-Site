@@ -1,6 +1,6 @@
 
 window.addEventListener("DOMContentLoaded", function () {
-	console.log("Window loaded.")
+	// console.log("Window loaded.")
 	updateTable();
 }, false);
 
@@ -23,14 +23,14 @@ function formatTable(content = []) {
 	function formatElement(element) {
 		// {"name": "Green LED", "id": 15, "io_type": "OUT"},
 		if (element.io_type == "IN") {
-			return "<div class='output'>" + element.name + "</div>"
+			return "<div class='output'>" + element.name + " = " + element.value + "</div>"
 		} else if (element.io_type == "OUT") {
 			return "<div class='input-type'>"
-				+ element.name
+				+ element.name + " = " + element.value
 				+ "<div>"
-				+ "<div>    <button type='button' onClick='pressButton('" + element.id + "','on')'>On!</button></div>\n"
-				+ "<div>    <button type='button' onClick='pressButton('" + element.id + "','toggle')'>Toggle!</button></div>\n"
-				+ "<div>    <button type='button' onClick='pressButton('" + element.id + "','off')'>Off!</button></div>\n"
+				+ "<div>    <button type='button' onClick='pressButton(\"" + element.id + "\",\"off\")'>Off!</button></div>\n"
+				+ "<div>    <button type='button' onClick='pressButton(\"" + element.id + "\",\"toggle\")'>Toggle!</button></div>\n"
+				+ "<div>    <button type='button' onClick='pressButton(\"" + element.id + "\",\"on\")'>On!</button></div>\n"
 				+ "</div>\n</div>\n"
 		} else {
 			return "";
@@ -47,9 +47,9 @@ function updateTable() {
 		.then(r => r.json())
 		.then(data => {
 
-			console.log(data);
+			// console.log(data);
 			content = formatTable(data);
-			console.log(content);
+			// console.log(content);
 			document.getElementById("mainContent").innerHTML = content;
 		})
 }
