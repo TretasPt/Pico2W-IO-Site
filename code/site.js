@@ -40,18 +40,32 @@ function formatTable(content = []) {
 	return content.map(formatElement).reduce((a, b) => a + b, "");
 }
 
-function updateTable() {
-	fetch("/data.json", {
-		method: "GET",
-	})
-		.then(r => r.json())
-		.then(data => {
+function updateTable(data = undefined) {
 
-			// console.log(data);
-			content = formatTable(data);
-			// console.log(content);
-			document.getElementById("mainContent").innerHTML = content;
+	function updateHTML(data) {
+		// console.log(data);
+		content = formatTable(data);
+		// console.log(content);
+		document.getElementById("mainContent").innerHTML = content;
+	}
+
+	if (data) {
+		updateHTML(data);
+	} else {
+
+		fetch("/data.json", {
+			method: "GET",
 		})
+			.then(r => r.json())
+			.then(data => updateHTML(data))
+	}
+
 }
 
-interval = setInterval(updateTable, 5000)
+// interval = setInterval(updateTable, 5000)
+var source = new EventSource("/dataSSE.json");
+source.addEventListener("change",(event)=>{
+	console.log(event);
+	console.log(event.data);
+	updateTable(JSON.parse(event.data))
+})

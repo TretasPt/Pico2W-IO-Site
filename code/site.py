@@ -8,14 +8,18 @@ from utils import bin_blink
 
 #Variables
 ssid, password = getWifi()
-led_one = Pin(14, Pin.OUT)
-led_two = Pin(15, Pin.OUT)
+# led_one = Pin(14, Pin.OUT)
+# led_two = Pin(15, Pin.OUT)
+SSEClients = []
 
-def formatResponse(status,mimeType,body):
+def formatSSE(data:str,tag:str):
+    return data.replace("\n","\n" + tag + ": ")
+
+def formatResponse(status,mimeType:str,body:str) -> str:
     response = b"HTTP/1.0 " + status + "\nContent-type: " + mimeType + "\n\n" + body
     return response
 
-def serveFile(request):
+def serveFile(request:str) -> tuple [str,bool|None]:
     # print("request: ",request,"\n")
     parts = request.split(" ")
 
@@ -23,59 +27,43 @@ def serveFile(request):
         if parts[1] == "/":
             f = open("site.html", "r")
             website = f.read()
-            return formatResponse("200 OK","text/html",website)
+            return formatResponse("200 OK","text/html",website), None
         elif parts[1] == "/favicon.ico":
             f = open("favicon.ico", "rb")
             website = f.read()
-            return formatResponse("200 OK","image/x-icon",website)
+            return formatResponse("200 OK","image/x-icon",website), None
         elif parts[1] == "/site.css":
             f = open("site.css", "r")
             website = f.read()
-            return formatResponse("200 OK","text/css",website)
+            return formatResponse("200 OK","text/css",website), None
         elif parts[1] == "/site.js":
             f = open("site.js", "r")
             website = f.read()
-            return formatResponse("200 OK","text/js",website)
+            return formatResponse("200 OK","text/js",website), None
         elif parts[1] == "/data.json":
-            # f = open("site.js", "r")
-            # website = f.read()
-            # website = '{"data":["todo"]}'
-            return formatResponse("200 OK","application/json",getInterfacesJSON())
+            return formatResponse("200 OK","application/json",getInterfacesJSON()), None
+        elif parts[1] == "/dataSSE.json":
+            return formatResponse("200 OK","text/event-stream","event: change\ndata:" + formatSSE(getInterfacesJSON(),"data") + "\n\n"), True
         else:
-            return formatResponse("400 Bad request","text/html","Unknown GET request " + parts[1])
+            return formatResponse("400 Bad request","text/html","Unknown GET request " + parts[1]), None
     if(parts[0][2:] == "POST"):
 
         content = request[request.find("{"):request.find("}")+1].replace("\\r","").replace("\\n","").strip()
-        print("content: ",content)
+        # print("content: ",content)
         contentDict = json.loads(content)
-        print("contentDict: ",contentDict)
+        # print("contentDict: ",contentDict)
         
         if('target' in contentDict and 'value' in contentDict):
-            # if(contentDict['target'] == "led1"):
-            #     target = led_one
-            # elif(contentDict['target'] == "led2"):            
-            #     target = led_two
-            # else:
-            #     return formatResponse("400 Bad request","text/html","400 - Unknown target " + contentDict.target)
-            
-            # if(contentDict['value'] == "on"):
-            #     target.on()
-            # elif(contentDict['value'] == "off"):
-            #     target.off()
-            # elif(contentDict['value'] == "toggle"):
-            #     target.toggle()
-            # else:
-            #     return formatResponse("400 Bad request","text/html","400 - Unknown value " + contentDict.value)
-            
-            # return formatResponse("200 OK","text/text","target " + contentDict['target'] + " set to " + str(target.value()))
-
             resultStatus, resultMessage = runAction(contentDict['target'],contentDict['value'])
-            return formatResponse(resultStatus,"text/text",resultMessage)
+            for con,addr in SSEClients:
+                print("updating client ",addr)
+                con.send(formatResponse("200 OK","text/event-stream","event: change\ndata:" + formatSSE(getInterfacesJSON(),"data") + "\n\n"))
+            return formatResponse(resultStatus,"text/text",resultMessage), None
 
         else:
-            return formatResponse("400 Bad request","text/html", "Wrong format. Expected target and value.")
+            return formatResponse("400 Bad request","text/html", "Wrong format. Expected target and value."), None
     
-    return formatResponse("500 Internal server error", "text/html","Internal error on function serveFile")
+    return formatResponse("500 Internal server error", "text/html","Internal error on function serveFile"), None
 
 def main():
     # Setup wifi connection
@@ -100,13 +88,13 @@ def main():
     ipAddress = status[0]
     addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
     try:
-        
         s = socket.socket()
         s.bind(addr)
         s.listen(1)
     except Exception as error:
         s.close()
         raise RuntimeError('Socket creation failed.')
+    
     bin_blink(3,"Starting main loop.")
 
     while True:
@@ -116,8 +104,15 @@ def main():
             request = cl.recv(1024)
             request = str(request)
             
-            cl.send(serveFile(request))
-            cl.close()
+            response,stayAlive = serveFile(request)
+            if(stayAlive):
+                cl.send(response)
+                SSEClients.append((cl,addr))
+            else:
+                cl.send(response)
+                cl.close()
+                
+            
         except OSError as e:
             cl.close()
             print('connection closed')
