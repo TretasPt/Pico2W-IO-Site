@@ -53,7 +53,7 @@ function updateTable(data = undefined) {
 		updateHTML(data);
 	} else {
 
-		fetch("/data.json", {
+		fetch("data.json", {//if you fetch "/data.json" it will wook for a path relative to the root of the domain. May not correspond with this site.
 			method: "GET",
 		})
 			.then(r => r.json())
@@ -63,7 +63,7 @@ function updateTable(data = undefined) {
 }
 
 // interval = setInterval(updateTable, 5000)
-var source = new EventSource("/dataSSE.json");
+var source = new EventSource("dataSSE.json");
 source.addEventListener("change",(event)=>{
 	console.log(event);
 	console.log(event.data);
