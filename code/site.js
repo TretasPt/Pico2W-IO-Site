@@ -15,7 +15,7 @@ function pressButton(target, value) {
 		headers: {
 			"Content-type": "application/json; charset=UTF-8"
 		}
-	}).then(r => { console.log(r) })
+	}).then(r => { console.log(r); updateTable() })
 }
 
 function formatTable(content = []) {
@@ -62,10 +62,10 @@ function updateTable(data = undefined) {
 
 }
 
-// interval = setInterval(updateTable, 5000)
-var source = new EventSource("dataSSE.json");
-source.addEventListener("change",(event)=>{
-	console.log(event);
-	console.log(event.data);
-	updateTable(JSON.parse(event.data))
-})
+interval = setInterval(updateTable, 5000)
+// var source = new EventSource("dataSSE.json");
+// source.addEventListener("change",(event)=>{
+// 	console.log(event);
+// 	console.log(event.data);
+// 	updateTable(JSON.parse(event.data))
+// })

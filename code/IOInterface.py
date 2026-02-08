@@ -50,9 +50,16 @@ class IOInterfaceOUT(IOInterface):
 
 
 class IOInterfaceIN(IOInterface):
-    def __init__(self, pin_id:int, name, pull = Pin.PULL_DOWN):
+    def __init__(self, pin_id:int, name, pull = Pin.PULL_DOWN, onChange = lambda :print("Something changed.")):
+        self.onChange = onChange
         pin = Pin(pin_id,Pin.IN,pull=pull)
+        pin.irq(onChange)
         super().__init__(pin, name,pin_id)
+
+    def updateIRQ(self, newOnchange):
+        print("onchange updated")
+        # self.onChange = newOnchange
+        self.__pin.irq(newOnchange,trigger=Pin.IRQ_RISING)
 
     def json(self) -> str:
         jsonDict = {
